@@ -37,6 +37,7 @@
     "@radix-ui/react-toggle-group": "^1.1.7",
     "@radix-ui/react-tooltip": "^1.2.4",
     "@tanstack/react-form": "^1.9.0",
+    "@tanstack/zod-form-adapter": "^0.42.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -55,11 +56,11 @@
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.2.0",
     "vaul": "^1.1.2",
-    "zod": "^3.24.3"
+    "zod": "link:@hookform/resolvers/zod"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "@hookform/resolvers/zod",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
