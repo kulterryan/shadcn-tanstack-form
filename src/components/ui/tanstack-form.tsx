@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label"
 const Form = React.forwardRef<
   HTMLFormElement, 
   {
-    form: FormApi<any, any, any, any, any, any, any, any, any, any>
+    form: FormApi<any, any, any, any, any, any, any, any, any, any>,
     children: React.ReactNode
   } & React.HTMLAttributes<HTMLFormElement>
 >(({ form, children, ...props }, ref) => {

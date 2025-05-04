@@ -60,8 +60,6 @@ const userSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number"),
 })
 
-type UserFormValues = z.infer<typeof userSchema>
-
 // Define custom validator functions with the correct parameter type
 const validateUsername = ({ value }: { value: string }) => {
   if (!value) return undefined;
@@ -134,7 +132,8 @@ export function UserForm() {
           ),
           duration: 5000,
         })
-      } catch (error) {
+      } catch (error: unknown) {
+        console.error("Form submission error:", error);
         toast.error("An unexpected error occurred");
       }
     },
