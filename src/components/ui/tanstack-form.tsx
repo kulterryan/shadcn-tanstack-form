@@ -177,10 +177,12 @@ function FormMessage({ className, fieldApi, ...props }: FormMessageProps) {
   if (errorMessage) {
     if (typeof errorMessage === 'string') {
       // Already a string, use it directly
+    } else if (errorMessage === null || errorMessage === undefined) {
+      errorMessage = undefined; // Clear the error message
     } else if (typeof errorMessage === 'object') {
       // Try to extract a message property or convert to string
       if (errorMessage.message) {
-        errorMessage = errorMessage.message;
+        errorMessage = String(errorMessage.message);
       } else if (errorMessage.toString && errorMessage.toString() !== '[object Object]') {
         errorMessage = errorMessage.toString();
       } else {

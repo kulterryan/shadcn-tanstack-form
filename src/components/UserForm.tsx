@@ -3,7 +3,6 @@
 import * as React from "react"
 import { z } from "zod"
 import { useForm } from "@tanstack/react-form"
-import { zodValidator } from "@tanstack/zod-form-adapter"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,7 +17,7 @@ import {
 } from "@/components/ui/tanstack-form"
 
 // Define the form schema with Zod
-const UserFormSchema = z.object({
+const userSchema = z.object({
   username: z.string()
     .min(3, "Username must be at least 3 characters")
     .max(20, "Username must not exceed 20 characters"),
@@ -61,21 +60,50 @@ const UserFormSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number"),
 })
 
-type UserFormValues = z.infer<typeof UserFormSchema>
+type UserFormValues = z.infer<typeof userSchema>
+
+// Define custom validator functions with the correct parameter type
+const validateUsername = ({ value }: { value: string }) => {
+  if (!value) return undefined;
+  try {
+    userSchema.shape.username.parse(value);
+    return undefined;
+  } catch (error) {
+    if (error instanceof z.ZodError && error.errors.length > 0) {
+      return error.errors[0].message;
+    }
+    return "Username validation failed";
+  }
+};
+
+const validateEmail = ({ value }: { value: string }) => {
+  if (!value) return undefined;
+  try {
+    userSchema.shape.email.parse(value);
+    return undefined;
+  } catch (error) {
+    if (error instanceof z.ZodError && error.errors.length > 0) {
+      return error.errors[0].message;
+    }
+    return "Email validation failed";
+  }
+};
+
+const validatePassword = ({ value }: { value: string }) => {
+  if (!value) return undefined;
+  try {
+    userSchema.shape.password.parse(value);
+    return undefined;
+  } catch (error) {
+    if (error instanceof z.ZodError && error.errors.length > 0) {
+      return error.errors[0].message;
+    }
+    return "Password validation failed";
+  }
+};
 
 export function UserForm() {
-  const form = useForm<
-    UserFormValues,
-    any, // TError
-    any, // TResult
-    any, // TFormValidator
-    any, // TFormMeta
-    any, // TFormDecorator
-    any, // TFieldValidator
-    any, // TFieldMeta
-    any, // TFieldDecorator
-    any  // TOptions
-  >({
+  const form = useForm({
     defaultValues: {
       username: "",
       email: "",
@@ -83,10 +111,16 @@ export function UserForm() {
     },
     onSubmit: async ({ value }) => {
       try {
-        // Validate all fields with the schema before submitting
-        UserFormSchema.parse(value);
+        // Validate the entire form with Zod
+        const result = userSchema.safeParse(value);
         
-        // Handle form submission
+        if (!result.success) {
+          result.error.errors.forEach(error => {
+            toast.error(`${error.path}: ${error.message}`, { duration: 3000 });
+          });
+          return;
+        }
+        
         console.log("Form submitted:", value)
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1000))
@@ -101,15 +135,7 @@ export function UserForm() {
           duration: 5000,
         })
       } catch (error) {
-        if (error instanceof z.ZodError) {
-          error.errors.forEach(err => {
-            toast.error(`Validation error: ${err.message}`, {
-              duration: 3000,
-            });
-          });
-        } else {
-          toast.error("An unexpected error occurred");
-        }
+        toast.error("An unexpected error occurred");
       }
     },
   })
@@ -129,18 +155,8 @@ export function UserForm() {
           {form.Field({
             name: "username",
             validators: {
-              onBlur: ({ value }) => {
-                try {
-                  // Synchronous validation instead of async
-                  UserFormSchema.shape.username.parse(value);
-                  return undefined;
-                } catch (error) {
-                  if (error instanceof z.ZodError && error.errors.length > 0) {
-                    return error.errors[0].message;
-                  }
-                  return "Invalid username";
-                }
-              }
+              onChange: validateUsername,
+              onBlur: validateUsername
             },
             children: (field) => (
               <FormField name="username" form={form}>
@@ -168,18 +184,8 @@ export function UserForm() {
           {form.Field({
             name: "email",
             validators: {
-              onBlur: ({ value }) => {
-                try {
-                  // Use synchronous parse instead of async
-                  UserFormSchema.shape.email.parse(value);
-                  return undefined;
-                } catch (error) {
-                  if (error instanceof z.ZodError && error.errors.length > 0) {
-                    return error.errors[0].message;
-                  }
-                  return "Invalid email address";
-                }
-              }
+              onChange: validateEmail,
+              onBlur: validateEmail
             },
             children: (field) => (
               <FormField name="email" form={form}>
@@ -208,18 +214,8 @@ export function UserForm() {
           {form.Field({
             name: "password",
             validators: {
-              onBlur: ({ value }) => {
-                try {
-                  // Use synchronous parse instead of async
-                  UserFormSchema.shape.password.parse(value);
-                  return undefined;
-                } catch (error) {
-                  if (error instanceof z.ZodError && error.errors.length > 0) {
-                    return error.errors[0].message;
-                  }
-                  return "Invalid password";
-                }
-              }
+              onChange: validatePassword,
+              onBlur: validatePassword
             },
             children: (field) => (
               <FormField name="password" form={form}>
